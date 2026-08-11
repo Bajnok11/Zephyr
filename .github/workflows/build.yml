@@ -1,0 +1,45 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build (macOS, arm64)
+    runs-on: macos-15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: swift --version
+
+      - name: Build (debug)
+        run: swift build --arch arm64
+
+      - name: Build (release)
+        run: swift build -c release --arch arm64
+
+      - name: Package app bundle
+        run: ./Scripts/build.sh
+
+      - name: Verify bundle contents
+        run: |
+          APP="$HOME/Applications/Zephyr.app"
+          test -x "$APP/Contents/MacOS/Zephyr"
+          test -x "$APP/Contents/Library/zephyr-helper"
+          test -f "$APP/Contents/Resources/install-helper.sh"
+          test -f "$APP/Contents/Resources/uninstall-helper.sh"
+          test -f "$APP/Contents/Info.plist"
+          codesign --verify --verbose "$APP"
+
+      - name: Upload app
+        uses: actions/upload-artifact@v4
+        with:
+          name: Zephyr.app
+          path: ~/Applications/Zephyr.app
+          if-no-files-found: error
