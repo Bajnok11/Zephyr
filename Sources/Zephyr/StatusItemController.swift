@@ -51,8 +51,12 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
     // MARK: Setup
 
     private func configureButton() {
+        // No autosaveName on purpose. With one, AppKit stores a "preferred
+        // position" that can land the item on top of the system clock, where it
+        // is drawn over and effectively invisible — with the app still running
+        // and reporting isVisible == true. Letting AppKit place the item fresh
+        // each launch is worth more than remembering a drag.
         statusItem.isVisible = true
-        statusItem.autosaveName = "ZephyrStatusItem"
         guard let button = statusItem.button else {
             return
         }
@@ -150,13 +154,63 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
         }
     }
 
+    /// True when macOS did not place our item in the menu bar at all. This
+    /// happens on a crowded bar — the notch eats the middle of the screen, and
+    /// once the remaining space is used up new items simply get no window.
+    var statusItemIsUnavailable: Bool {
+        guard let button = statusItem.button, let window = button.window else { return true }
+        guard statusItem.isVisible, button.frame.width > 0, window.frame.width > 0 else { return true }
+        guard let screen = window.screen ?? NSScreen.main else { return false }
+
+        // An item macOS actually placed sits in the menu bar strip along the top
+        // of its screen. On an oversubscribed bar it gets parked below the
+        // screen instead, or pushed flush against the right edge where the
+        // system's own clock and Control Center are drawn over it. Both look
+        // identical to the user: no icon, no way in.
+        if window.frame.maxY < screen.frame.maxY - 8 { return true }
+        if window.frame.maxX >= screen.frame.maxX - 1 { return true }
+        return false
+    }
+
+    /// Last resort: if there is no icon to click, the app must still be usable.
+    /// AppKit occasionally hands a newly created item a slot flush against the
+    /// right edge, underneath the system clock. Re-adding the item makes it lay
+    /// the menu bar out again, which usually lands it in the normal region.
+    func retryStatusItemPlacement() {
+        guard statusItemIsUnavailable else { return }
+        statusItem.isVisible = false
+        statusItem.isVisible = true
+    }
+
+    func showPanelIfStatusItemUnavailable() {
+        if ProcessInfo.processInfo.environment["ZEPHYR_DEBUG"] == "1" {
+            let button = statusItem.button
+            let message = """
+            [zephyr] isVisible=\(statusItem.isVisible) length=\(statusItem.length) \
+            buttonFrame=\(button?.frame.debugDescription ?? "nil") \
+            windowFrame=\(button?.window?.frame.debugDescription ?? "nil") \
+            screen=\(NSScreen.main?.frame.debugDescription ?? "nil") \
+            visibleFrame=\(NSScreen.main?.visibleFrame.debugDescription ?? "nil") \
+            unavailable=\(statusItemIsUnavailable) title=\(button?.attributedTitle.string ?? "nil") \
+            hasImage=\(button?.image != nil)
+            """
+            FileHandle.standardError.write((message + "\n").data(using: .utf8)!)
+        }
+        guard statusItemIsUnavailable else { return }
+        state.reportMenuBarUnavailable()
+        showPanelWindow()
+    }
+
     /// Opens the panel without a click on the status item. Menu bar managers
     /// park hidden items off-screen, where a popover cannot anchor, so fall
     /// back to a floating window in that case.
     func showPanel() {
         guard !popover.isShown else { return }
+        // Anchor the popover only if the item really is in the bar. If it never
+        // fit, or a menu bar manager parked it off-screen, a popover has
+        // nothing to attach to — fall back to the window.
         if let button = statusItem.button, let window = button.window,
-           window.frame.origin.x >= 0, window.frame.width > 0 {
+           !statusItemIsUnavailable, window.frame.origin.x >= 0 {
             togglePopover()
         } else {
             showPanelWindow()

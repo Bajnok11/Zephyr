@@ -33,7 +33,15 @@ cp "$PROJECT_DIR/Scripts/install-helper.sh" "$APP/Contents/Resources/install-hel
 cp "$PROJECT_DIR/Scripts/uninstall-helper.sh" "$APP/Contents/Resources/uninstall-helper.sh"
 chmod +x "$APP/Contents/Resources/"*.sh
 
-cat > "$APP/Contents/Info.plist" <<'PLIST'
+SDK_VERSION="$(xcrun --show-sdk-version)"
+SDK_BUILD="$(xcrun --show-sdk-build-version)"
+OS_BUILD="$(sw_vers -buildVersion)"
+
+# The DT* keys are not decoration. Without them macOS treats the bundle as a
+# legacy app and hands it the pre-Big-Sur 22pt menu bar geometry, which on a
+# notched Mac lands the status item outside the real 33pt menu bar strip — the
+# icon then never appears, with the app running and reporting itself visible.
+cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -60,6 +68,18 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
     <true/>
     <key>NSHighResolutionCapable</key>
     <true/>
+    <key>DTPlatformName</key>
+    <string>macosx</string>
+    <key>DTPlatformVersion</key>
+    <string>${SDK_VERSION}</string>
+    <key>DTSDKName</key>
+    <string>macosx${SDK_VERSION}</string>
+    <key>DTSDKBuild</key>
+    <string>${SDK_BUILD}</string>
+    <key>DTCompiler</key>
+    <string>com.apple.compilers.llvm.clang.1_0</string>
+    <key>BuildMachineOSBuild</key>
+    <string>${OS_BUILD}</string>
     <key>NSHumanReadableCopyright</key>
     <string>Zephyr — ventilátorvezérlés Apple Silicon és Intel Macekhez.</string>
 </dict>

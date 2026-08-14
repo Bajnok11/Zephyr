@@ -11,6 +11,7 @@ struct ControlPanelView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
+                    if state.menuBarUnavailable { menuBarWarning }
                     presetSection
                     if state.effectivePreset.id == Preset.BuiltIn.manual { manualSlider }
                     fanSection
@@ -83,6 +84,21 @@ struct ControlPanelView: View {
         case .notInstalled: return .orange
         case .failed: return .red
         }
+    }
+
+    private var menuBarWarning: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Label("Nincs hely a menüsorban", systemImage: "exclamationmark.triangle.fill")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(.orange)
+            Text("A macOS nem tudta kitenni a Zephyr ikonját, mert a menüsor betelt. Zárj be pár menüsor-ikont, vagy állítsd a kijelzést „Csak ikon”-ra a Beállításokban. Addig ez az ablak a Zephyr indításával bármikor előhívható.")
+                .font(.system(size: 10.5))
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 11, style: .continuous))
     }
 
     // MARK: Presets

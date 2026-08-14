@@ -113,7 +113,12 @@ The package has three targets: `ZephyrKit` (SMC access, models, presets, helper 
 
 ## Troubleshooting
 
-**The menu bar icon isn't there.** If you run a menu bar manager (Ice, Bartender, Hidden Bar), new items land in the hidden section — unhide Zephyr there. You can always reach the panel from the right-click menu's *Vezérlőpult ablakban* entry.
+**The menu bar icon isn't there.** Two causes, in order of likelihood:
+
+- *A menu bar manager* (Ice, Bartender, Hidden Bar) puts new items in the hidden section — unhide Zephyr there.
+- *The menu bar is full.* On a notched Mac with a dozen menu bar apps there may be no slot left, and macOS then parks the item off-screen or underneath the system clock. The app keeps running and still reports itself as visible, so there is no error to see. Zephyr detects this and opens its panel window instead, with a note explaining what happened. Freeing a slot (quit a menu bar app, or switch the display to *Csak ikon* so Zephyr needs half the width) gets the icon back.
+
+Either way the app is always reachable: **click Zephyr in Finder / Applications / Spotlight while it is running and the panel opens**, and the status item's right-click menu has a *Vezérlőpult ablakban* entry.
 
 **"Nem sikerült csatlakozni a szolgáltatáshoz".** The helper isn't running. Check `sudo launchctl print system/com.bence.zephyr.helper` and `/var/log/zephyr-helper.log`, or just press **Újratelepítés**.
 

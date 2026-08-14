@@ -42,6 +42,12 @@ final class AppState: ObservableObject {
     @Published private(set) var isOnBattery = false
     @Published private(set) var lastError: String?
     @Published var isInstallingHelper = false
+    /// Set when macOS could not fit our icon into the menu bar.
+    @Published private(set) var menuBarUnavailable = false
+
+    func reportMenuBarUnavailable() {
+        menuBarUnavailable = true
+    }
 
     @Published var settings: Settings {
         didSet {
@@ -69,14 +75,30 @@ final class AppState: ObservableObject {
         settings = loaded
         effectivePresetID = loaded.activePresetID
 
-        do {
-            monitor = try HardwareMonitor()
-        } catch {
-            lastError = error.localizedDescription
-        }
-
         refreshHelperState()
         start()
+
+        // Sensor discovery walks every SMC key — a couple of thousand of them,
+        // two round trips each. Doing that on the main thread stalls launch for
+        // seconds, and a status item created after that stall gets mis-placed
+        // by the window server. Discover in the background instead; `tick()`
+        // no-ops until the monitor is ready.
+        queue.async { [weak self] in
+            let created: HardwareMonitor?
+            var failure: String?
+            do {
+                created = try HardwareMonitor()
+            } catch {
+                created = nil
+                failure = error.localizedDescription
+            }
+            Task { @MainActor in
+                guard let self else { return }
+                self.monitor = created
+                self.lastError = failure
+                self.tick()
+            }
+        }
     }
 
     // MARK: Presets

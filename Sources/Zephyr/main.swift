@@ -31,6 +31,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             // First run with no helper: open settings so the install button is visible.
             statusController?.openSettings()
         }
+
+        // A crowded menu bar — especially on a notched Mac — can leave no room
+        // for a new status item, and macOS then gives it no window at all. The
+        // app would be running with no way to reach it, so show the panel and
+        // say what happened. Checked on a delay because the item is not laid
+        // out yet at the end of launch.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
+            self?.statusController?.retryStatusItemPlacement()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                self?.statusController?.showPanelIfStatusItemUnavailable()
+            }
+        }
+    }
+
+    /// Clicking the app in Finder, Spotlight or the Dock while it is already
+    /// running must do something visible — for a menu bar app that means
+    /// bringing up the panel.
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows: Bool) -> Bool {
+        statusController?.showPanel()
+        return true
     }
 
     func applicationWillTerminate(_ notification: Notification) {
