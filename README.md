@@ -113,12 +113,13 @@ The package has three targets: `ZephyrKit` (SMC access, models, presets, helper 
 
 ## Troubleshooting
 
-**The menu bar icon isn't there.** Two causes, in order of likelihood:
+**The menu bar icon isn't there.** Three causes, in order of likelihood:
 
-- *A menu bar manager* (Ice, Bartender, Hidden Bar) puts new items in the hidden section — unhide Zephyr there.
-- *The menu bar is full.* On a notched Mac with a dozen menu bar apps there may be no slot left, and macOS then parks the item off-screen or underneath the system clock. The app keeps running and still reports itself as visible, so there is no error to see. Zephyr detects this and opens its panel window instead, with a note explaining what happened. Freeing a slot (quit a menu bar app, or switch the display to *Csak ikon* so Zephyr needs half the width) gets the icon back.
+- *The app that launched Zephyr is disabled in the menu bar allow-list.* This one is vicious, because nothing about it points at Zephyr. macOS 26 keeps a per-app list under **System Settings → Menu Bar → "Allow in the Menu Bar"**, and the block propagates from the **launching** process to whatever it launches. If you start Zephyr from a terminal, an IDE, or a coding agent whose own entry is switched off, Zephyr's status item is silently denied a slot — `NSStatusItem.isVisible` still reports `true`, the button still has a valid frame, and there is no error anywhere. The tell is the geometry: a placed item's window is **33 pt** tall and sits inside the menu bar strip; a denied one is **22 pt** tall and is parked off-screen or flush past the right edge, underneath the system clock. Fix: enable the launching app in that list, or just launch Zephyr normally (Finder, Spotlight, or as a login item).
+- *A menu bar manager* (Ice, Bartender, Hidden Bar) puts new items in its hidden section — unhide Zephyr there.
+- *The menu bar is genuinely full.* On a notched Mac with a dozen menu bar apps there may be no slot left. Switching the display style to *Csak ikon* halves the width Zephyr needs.
 
-Either way the app is always reachable: **click Zephyr in Finder / Applications / Spotlight while it is running and the panel opens**, and the status item's right-click menu has a *Vezérlőpult ablakban* entry.
+Zephyr detects all three: when the item is not really placed it opens its panel window instead, with a note explaining what happened. And the app is always reachable — **click Zephyr in Finder / Applications / Spotlight while it is running and the panel opens** — plus the status item's right-click menu has a *Vezérlőpult ablakban* entry.
 
 **"Nem sikerült csatlakozni a szolgáltatáshoz".** The helper isn't running. Check `sudo launchctl print system/com.bence.zephyr.helper` and `/var/log/zephyr-helper.log`, or just press **Újratelepítés**.
 

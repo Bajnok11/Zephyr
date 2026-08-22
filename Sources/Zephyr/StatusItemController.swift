@@ -194,7 +194,7 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
             unavailable=\(statusItemIsUnavailable) title=\(button?.attributedTitle.string ?? "nil") \
             hasImage=\(button?.image != nil)
             """
-            FileHandle.standardError.write((message + "\n").data(using: .utf8)!)
+            try? (message + "\n").write(toFile: "/tmp/zephyr-debug.log", atomically: true, encoding: .utf8)
         }
         guard statusItemIsUnavailable else { return }
         state.reportMenuBarUnavailable()
