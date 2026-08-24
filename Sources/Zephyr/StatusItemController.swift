@@ -154,9 +154,13 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
         }
     }
 
-    /// True when macOS did not place our item in the menu bar at all. This
-    /// happens on a crowded bar — the notch eats the middle of the screen, and
-    /// once the remaining space is used up new items simply get no window.
+    /// True when macOS did not place our item in the menu bar at all.
+    ///
+    /// The usual cause is the macOS 26 per-app menu bar allow-list: the block
+    /// propagates from whatever process launched us, so being started by a
+    /// disabled terminal, IDE or agent is enough. A genuinely full bar does it
+    /// too. In every case NSStatusItem keeps reporting isVisible == true with a
+    /// valid button frame, so only the window geometry gives it away.
     var statusItemIsUnavailable: Bool {
         guard let button = statusItem.button, let window = button.window else { return true }
         guard statusItem.isVisible, button.frame.width > 0, window.frame.width > 0 else { return true }
@@ -173,15 +177,6 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
     }
 
     /// Last resort: if there is no icon to click, the app must still be usable.
-    /// AppKit occasionally hands a newly created item a slot flush against the
-    /// right edge, underneath the system clock. Re-adding the item makes it lay
-    /// the menu bar out again, which usually lands it in the normal region.
-    func retryStatusItemPlacement() {
-        guard statusItemIsUnavailable else { return }
-        statusItem.isVisible = false
-        statusItem.isVisible = true
-    }
-
     func showPanelIfStatusItemUnavailable() {
         if ProcessInfo.processInfo.environment["ZEPHYR_DEBUG"] == "1" {
             let button = statusItem.button

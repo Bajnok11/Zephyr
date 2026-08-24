@@ -32,16 +32,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             statusController?.openSettings()
         }
 
-        // A crowded menu bar — especially on a notched Mac — can leave no room
-        // for a new status item, and macOS then gives it no window at all. The
-        // app would be running with no way to reach it, so show the panel and
-        // say what happened. Checked on a delay because the item is not laid
-        // out yet at the end of launch.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
-            self?.statusController?.retryStatusItemPlacement()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                self?.statusController?.showPanelIfStatusItemUnavailable()
-            }
+        // macOS can refuse our status item a slot — most often because the app
+        // that launched us is switched off in the menu bar allow-list. The app
+        // would then be running with no way to reach it, so show the panel and
+        // explain. Checked on a delay because the item is not laid out yet at
+        // the end of launch.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+            self?.statusController?.showPanelIfStatusItemUnavailable()
         }
     }
 

@@ -44,6 +44,8 @@ final class AppState: ObservableObject {
     @Published var isInstallingHelper = false
     /// Set when macOS could not fit our icon into the menu bar.
     @Published private(set) var menuBarUnavailable = false
+    /// Set when the installed root helper is an older build than this app ships.
+    @Published private(set) var helperIsStale = false
 
     func reportMenuBarUnavailable() {
         menuBarUnavailable = true
@@ -305,6 +307,9 @@ final class AppState: ObservableObject {
         } else if helperState == .notInstalled {
             helperState = .installed
         }
+        // Comparing two 500 KB binaries, so do it on state changes only —
+        // never from a SwiftUI body.
+        helperIsStale = HelperClient.installedHelperIsStale
     }
 
     func installHelper() {
@@ -324,6 +329,7 @@ final class AppState: ObservableObject {
                 switch result {
                 case .success:
                     self.helperState = .installed
+                    self.refreshHelperState()
                     self.tick()
                 case .failure(let message):
                     self.lastError = message

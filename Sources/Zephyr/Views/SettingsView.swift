@@ -635,6 +635,14 @@ private struct GeneralSettings: View {
                     Spacer()
                 }
 
+                if state.helperIsStale {
+                    Label("A telepített szolgáltatás régebbi, mint amit ez az app hoz magával — futtasd az Újratelepítést.",
+                          systemImage: "exclamationmark.triangle.fill")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.orange)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
                 HStack {
                     Button(HelperClient.isInstalled ? "Újratelepítés" : "Telepítés") {
                         state.installHelper()

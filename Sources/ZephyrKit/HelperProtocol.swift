@@ -65,6 +65,26 @@ public final class HelperClient {
             && FileManager.default.fileExists(atPath: HelperProtocol.daemonPlistPath)
     }
 
+    /// The helper that ships inside this app bundle.
+    public static var bundledHelperPath: String? {
+        let path = Bundle.main.bundleURL
+            .appendingPathComponent("Contents/Library/zephyr-helper").path
+        return FileManager.default.fileExists(atPath: path) ? path : nil
+    }
+
+    /// True when the installed root helper is a different build from the one in
+    /// this app bundle. Updating the app does not update the helper — it lives
+    /// outside the bundle and only a privileged install can replace it — so
+    /// without this check an old daemon keeps running silently after an update.
+    public static var installedHelperIsStale: Bool {
+        guard isInstalled, let bundled = bundledHelperPath else { return false }
+        // Half a megabyte each — an exact comparison is cheap and leaves no
+        // room for a hash collision or an unstable hashing seed.
+        guard let installed = FileManager.default.contents(atPath: HelperProtocol.binaryPath),
+              let shipped = FileManager.default.contents(atPath: bundled) else { return false }
+        return installed != shipped
+    }
+
     public var isConnected: Bool {
         lock.lock(); defer { lock.unlock() }
         return fd >= 0

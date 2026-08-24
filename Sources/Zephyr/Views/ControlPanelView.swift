@@ -12,6 +12,7 @@ struct ControlPanelView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     if state.menuBarUnavailable { menuBarWarning }
+                    if state.helperIsStale { staleHelperWarning }
                     presetSection
                     if state.effectivePreset.id == Preset.BuiltIn.manual { manualSlider }
                     fanSection
@@ -91,7 +92,22 @@ struct ControlPanelView: View {
             Label("Nincs hely a menüsorban", systemImage: "exclamationmark.triangle.fill")
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(.orange)
-            Text("A macOS nem tudta kitenni a Zephyr ikonját, mert a menüsor betelt. Zárj be pár menüsor-ikont, vagy állítsd a kijelzést „Csak ikon”-ra a Beállításokban. Addig ez az ablak a Zephyr indításával bármikor előhívható.")
+            Text("A macOS nem adott helyet a Zephyr ikonjának. A leggyakoribb ok, hogy az az app, amelyik a Zephyrt elindította, ki van kapcsolva a Rendszerbeállítások → Menüsor listájában — a tiltás onnan öröklődik. Nézd meg ott, vagy indítsd a Zephyrt a Finderből. Addig ez az ablak a Zephyr indításával bármikor előhívható.")
+                .font(.system(size: 10.5))
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 11, style: .continuous))
+    }
+
+    private var staleHelperWarning: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Label("A vezérlő szolgáltatás elavult", systemImage: "arrow.triangle.2.circlepath")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(.orange)
+            Text("A telepített root szolgáltatás régebbi, mint amit ez a Zephyr hoz magával. Az appfrissítés nem cseréli le magától. Beállítások → Általános → Újratelepítés.")
                 .font(.system(size: 10.5))
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
