@@ -12,14 +12,18 @@ STAGE="$BUILD_DIR/stage"
 APP="$STAGE/Zephyr.app"
 INSTALL_DIR="$HOME/Applications"
 
-echo "==> Fordítás (release)"
+# Build for the machine we are on. Hardcoding arm64 here would break every
+# Intel Mac, which this app otherwise supports.
+ARCH="$(uname -m)"
+
+echo "==> Fordítás (release, $ARCH)"
 swift build \
     --package-path "$PROJECT_DIR" \
     --scratch-path "$BUILD_DIR/scratch" \
     -c release \
-    --arch arm64
+    --arch "$ARCH"
 
-BIN_DIR="$(swift build --package-path "$PROJECT_DIR" --scratch-path "$BUILD_DIR/scratch" -c release --arch arm64 --show-bin-path)"
+BIN_DIR="$(swift build --package-path "$PROJECT_DIR" --scratch-path "$BUILD_DIR/scratch" -c release --arch "$ARCH" --show-bin-path)"
 
 echo "==> Csomag összeállítása"
 rm -rf "$STAGE"

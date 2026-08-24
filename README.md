@@ -7,7 +7,7 @@
 
 **Zephyr** is a native macOS fan control app that lives in your menu bar. It reads every thermal sensor your Mac exposes, and lets you drive the fans from **presets** — including fan curves you draw by dragging points around.
 
-Built for Apple Silicon (M-series) and Intel Macs with controllable fans.
+Built and tested on Apple Silicon (M-series). Intel Macs use the same SMC keys and should work, but nothing here has been verified on one — reports welcome.
 
 > **Heads up:** the user interface is currently in **Hungarian**. Localisation PRs are very welcome — all strings live in the view files.
 
@@ -106,7 +106,7 @@ Anything unrecognised still shows up in the sensor browser under *Egyéb* with i
 ## Building from source
 
 ```bash
-swift build -c release --arch arm64
+swift build -c release
 ```
 
 The package has three targets: `ZephyrKit` (SMC access, models, presets, helper client), `ZephyrHelper` (the root daemon), and `Zephyr` (the SwiftUI app). `Scripts/build.sh` wraps this and does the bundling; it deliberately builds into `~/Library/Caches` rather than next to the sources, because iCloud-synced folders corrupt code signatures.
