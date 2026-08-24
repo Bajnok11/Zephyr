@@ -11,10 +11,10 @@ struct SettingsView: View {
 
         var title: String {
             switch self {
-            case .presets: return "Profilok"
-            case .sensors: return "Szenzorok"
-            case .automation: return "Automatizálás"
-            case .general: return "Általános"
+            case .presets: return "Presets"
+            case .sensors: return "Sensors"
+            case .automation: return "Automation"
+            case .general: return "General"
             }
         }
 
@@ -153,11 +153,11 @@ private struct PresetSettings: View {
                     }
                     .tag(preset.id)
                     .contextMenu {
-                        Button("Aktiválás") { state.select(preset: preset) }
-                        Button("Duplikálás") { selectedID = state.duplicate(preset: preset).id }
+                        Button("Activate") { state.select(preset: preset) }
+                        Button("Duplicate") { selectedID = state.duplicate(preset: preset).id }
                         if !preset.isBuiltIn {
                             Divider()
-                            Button("Törlés", role: .destructive) { state.delete(preset: preset) }
+                            Button("Delete", role: .destructive) { state.delete(preset: preset) }
                         }
                     }
                 }
@@ -172,7 +172,7 @@ private struct PresetSettings: View {
                 } label: {
                     Image(systemName: "plus")
                 }
-                .help("Új profil a kijelölt másolataként")
+                .help("New preset as a copy of the selected one")
 
                 Button {
                     if let selected, !selected.isBuiltIn {
@@ -183,11 +183,11 @@ private struct PresetSettings: View {
                     Image(systemName: "minus")
                 }
                 .disabled(selected?.isBuiltIn ?? true)
-                .help("Profil törlése")
+                .help("Delete preset")
 
                 Spacer()
 
-                Button("Aktiválás") {
+                Button("Activate") {
                     if let selected { state.select(preset: selected) }
                 }
                 .controlSize(.small)
@@ -204,7 +204,7 @@ private struct PresetSettings: View {
             PresetEditor(preset: preset)
                 .id(preset.id)
         } else {
-            ContentUnavailableView("Válassz profilt", systemImage: "dial.medium")
+            ContentUnavailableView("Select a preset", systemImage: "dial.medium")
         }
     }
 }
@@ -232,7 +232,7 @@ private struct PresetEditor: View {
                 header
 
                 if draft.isBuiltIn, draft.id != Preset.BuiltIn.manual, draft.id != Preset.BuiltIn.system {
-                    Label("A beépített profilok nem módosíthatók. Készíts másolatot a szerkesztéshez.",
+                    Label("Built-in presets cannot be edited. Duplicate one to make changes.",
                           systemImage: "info.circle")
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
@@ -242,7 +242,7 @@ private struct PresetEditor: View {
                 }
 
                 if draft.id == Preset.BuiltIn.system {
-                    Text("Ez a profil visszaadja a vezérlést a macOS firmware-nek. A Zephyr ilyenkor csak megfigyel.")
+                    Text("This preset hands control back to the macOS firmware. Zephyr only observes.")
                         .font(.system(size: 11.5))
                         .foregroundStyle(.secondary)
                 } else if draft.id == Preset.BuiltIn.manual {
@@ -276,7 +276,7 @@ private struct PresetEditor: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 if isEditable {
-                    TextField("Profil neve", text: $draft.name)
+                    TextField("Preset name", text: $draft.name)
                         .textFieldStyle(.plain)
                         .font(.system(size: 17, weight: .semibold))
                 } else {
@@ -302,7 +302,7 @@ private struct PresetEditor: View {
                 .frame(width: 96)
             }
 
-            Button(draft.id == state.settings.activePresetID ? "Aktív" : "Aktiválás") {
+            Button(draft.id == state.settings.activePresetID ? "Active" : "Activate") {
                 state.select(preset: draft)
             }
             .controlSize(.small)
@@ -313,7 +313,7 @@ private struct PresetEditor: View {
 
     private var manualEditor: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Kézi fordulatszám")
+            Text("Manual fan speed")
                 .font(.system(size: 12, weight: .medium))
             HStack {
                 Slider(value: Binding(get: { state.settings.manualPercent },
@@ -323,7 +323,7 @@ private struct PresetEditor: View {
                     .frame(width: 46, alignment: .trailing)
             }
             if let fan = state.snapshot.fans.first {
-                Text("\(fan.name): ≈ \(Int(fan.rpm(forPercent: state.settings.manualPercent).rounded())) RPM (tartomány \(Int(fan.minRPM))–\(Int(fan.maxRPM)))")
+                Text("\(fan.name): ≈ \(Int(fan.rpm(forPercent: state.settings.manualPercent).rounded())) RPM (range \(Int(fan.minRPM))–\(Int(fan.maxRPM)))")
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
             }
@@ -335,8 +335,8 @@ private struct PresetEditor: View {
         VStack(alignment: .leading, spacing: 14) {
             if isEditable {
                 Picker("", selection: $isCurveMode) {
-                    Text("Hőmérséklet-görbe").tag(true)
-                    Text("Fix fordulatszám").tag(false)
+                    Text("Temperature curve").tag(true)
+                    Text("Fixed speed").tag(false)
                 }
                 .labelsHidden()
                 .pickerStyle(.segmented)
@@ -372,7 +372,7 @@ private struct PresetEditor: View {
     private func curveSection(_ curve: FanCurve) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("Vezérlő szenzor")
+                Text("Driving sensor")
                     .font(.system(size: 12, weight: .medium))
                 Spacer()
                 if isEditable {
@@ -405,7 +405,7 @@ private struct PresetEditor: View {
 
     private func fixedSection(_ percent: Double) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Fix fordulatszám")
+            Text("Fixed fan speed")
                 .font(.system(size: 12, weight: .medium))
             HStack {
                 if isEditable {
@@ -453,10 +453,10 @@ private struct SensorSettings: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                TextField("Keresés név vagy SMC kulcs szerint", text: $search)
+                TextField("Search by name or SMC key", text: $search)
                     .textFieldStyle(.plain)
                 Spacer()
-                Text("\(filtered.count) / \(state.snapshot.sensors.count) szenzor")
+                Text("\(filtered.count) / \(state.snapshot.sensors.count) sensors")
                     .font(.system(size: 10))
                     .foregroundStyle(.secondary)
             }
@@ -504,12 +504,12 @@ private struct AutomationSettings: View {
     var body: some View {
         Form {
             SwiftUI.Section {
-                Toggle("Profilváltás tápellátás szerint", isOn: Binding(
+                Toggle("Switch preset by power source", isOn: Binding(
                     get: { state.settings.automation.enabled },
                     set: { state.settings.automation.enabled = $0 }
                 ))
 
-                Picker("Akkumulátoron", selection: Binding(
+                Picker("On battery", selection: Binding(
                     get: { state.settings.automation.onBattery ?? Preset.BuiltIn.system },
                     set: { state.settings.automation.onBattery = $0 }
                 )) {
@@ -517,7 +517,7 @@ private struct AutomationSettings: View {
                 }
                 .disabled(!state.settings.automation.enabled)
 
-                Picker("Hálózaton", selection: Binding(
+                Picker("On mains", selection: Binding(
                     get: { state.settings.automation.onPower ?? Preset.BuiltIn.system },
                     set: { state.settings.automation.onPower = $0 }
                 )) {
@@ -525,21 +525,21 @@ private struct AutomationSettings: View {
                 }
                 .disabled(!state.settings.automation.enabled)
             } header: {
-                Text("Tápellátás")
+                Text("Power source")
             } footer: {
-                Text(state.isOnBattery ? "Jelenleg akkumulátorról megy." : "Jelenleg hálózatról megy.")
+                Text(state.isOnBattery ? "Currently running on battery." : "Currently running on mains.")
                     .font(.system(size: 10.5))
                     .foregroundStyle(.secondary)
             }
 
             SwiftUI.Section {
-                Toggle("Vészhűtés magas hőmérsékleten", isOn: Binding(
+                Toggle("Emergency cooling above a threshold", isOn: Binding(
                     get: { state.settings.automation.emergencyEnabled },
                     set: { state.settings.automation.emergencyEnabled = $0 }
                 ))
 
                 HStack {
-                    Text("Küszöb")
+                    Text("Threshold")
                     Slider(value: Binding(
                         get: { state.settings.automation.emergencyTemperature },
                         set: { state.settings.automation.emergencyTemperature = $0 }
@@ -550,9 +550,9 @@ private struct AutomationSettings: View {
                         .frame(width: 54, alignment: .trailing)
                 }
             } header: {
-                Text("Biztonság")
+                Text("Safety")
             } footer: {
-                Text("A küszöb felett a profiltól függetlenül 100 %-ra megy a hűtés, és csak 4 °C-kal alatta enged vissza.")
+                Text("Above the threshold the fans go to 100 % whatever the preset says, and only step back down 4 °C below it.")
                     .font(.system(size: 10.5))
                     .foregroundStyle(.secondary)
             }
@@ -568,8 +568,8 @@ private struct GeneralSettings: View {
 
     var body: some View {
         Form {
-            SwiftUI.Section("Menüsor") {
-                Picker("Kijelzés", selection: Binding(
+            SwiftUI.Section("Menu bar") {
+                Picker("Display", selection: Binding(
                     get: { state.settings.menuBarStyle },
                     set: { state.settings.menuBarStyle = $0 }
                 )) {
@@ -577,7 +577,7 @@ private struct GeneralSettings: View {
                 }
 
                 HStack {
-                    Text("Hőmérséklet forrása")
+                    Text("Temperature source")
                     Spacer()
                     CurveSourcePicker(source: Binding(
                         get: { state.settings.menuBarSource },
@@ -585,12 +585,12 @@ private struct GeneralSettings: View {
                     ), availableKeys: state.allSensorKeys)
                 }
 
-                Toggle("Ikon pörgetése a terhelés arányában", isOn: Binding(
+                Toggle("Spin the icon with fan load", isOn: Binding(
                     get: { state.settings.animateIcon },
                     set: { state.settings.animateIcon = $0 }
                 ))
 
-                Toggle("E-magok külön mutatása", isOn: Binding(
+                Toggle("Show E-cores separately", isOn: Binding(
                     get: { state.settings.showEfficiencyCores },
                     set: { state.settings.showEfficiencyCores = $0 }
                 ))
@@ -598,7 +598,7 @@ private struct GeneralSettings: View {
 
             SwiftUI.Section {
                 HStack {
-                    Text("Felfutás lépésköze")
+                    Text("Ramp step")
                     Slider(value: Binding(
                         get: { state.settings.rampStep },
                         set: { state.settings.rampStep = $0 }
@@ -608,14 +608,14 @@ private struct GeneralSettings: View {
                         .frame(width: 92, alignment: .trailing)
                 }
 
-                Toggle("Indítás bejelentkezéskor", isOn: Binding(
+                Toggle("Launch at login", isOn: Binding(
                     get: { state.settings.launchAtLogin },
                     set: { state.settings.launchAtLogin = $0 }
                 ))
             } header: {
-                Text("Viselkedés")
+                Text("Behaviour")
             } footer: {
-                Text("Kisebb lépésköz halkabb, de lassabban követi a hőmérsékletet.")
+                Text("A smaller step is quieter but follows temperature more slowly.")
                     .font(.system(size: 10.5))
                     .foregroundStyle(.secondary)
             }
@@ -627,7 +627,7 @@ private struct GeneralSettings: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(state.helperState.title)
                             .font(.system(size: 12, weight: .medium))
-                        Text("A ventilátorok írásához root jogosultságú segédszolgáltatás kell. A jelszót a macOS saját ablaka kéri be.")
+                        Text("Writing to the fans needs a root helper service. macOS asks for your password in its own dialog.")
                             .font(.system(size: 10.5))
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -636,7 +636,7 @@ private struct GeneralSettings: View {
                 }
 
                 if state.helperIsStale {
-                    Label("A telepített szolgáltatás régebbi, mint amit ez az app hoz magával — futtasd az Újratelepítést.",
+                    Label("The installed service is older than the one this app ships with — run Reinstall.",
                           systemImage: "exclamationmark.triangle.fill")
                         .font(.system(size: 11))
                         .foregroundStyle(.orange)
@@ -644,12 +644,12 @@ private struct GeneralSettings: View {
                 }
 
                 HStack {
-                    Button(HelperClient.isInstalled ? "Újratelepítés" : "Telepítés") {
+                    Button(HelperClient.isInstalled ? "Reinstall" : "Install") {
                         state.installHelper()
                     }
                     .disabled(state.isInstallingHelper)
 
-                    Button("Eltávolítás") {
+                    Button("Remove") {
                         state.uninstallHelper()
                     }
                     .disabled(!HelperClient.isInstalled || state.isInstallingHelper)
@@ -660,22 +660,22 @@ private struct GeneralSettings: View {
                     Spacer()
                 }
             } header: {
-                Text("Vezérlő szolgáltatás")
+                Text("Control service")
             } footer: {
                 VStack(alignment: .leading, spacing: 4) {
                     if let error = state.lastError {
                         Text(error).foregroundStyle(.red)
                     }
-                    Text("Ha a szolgáltatás megszakad vagy a Zephyr kilép, a ventilátorok azonnal visszakerülnek a macOS vezérlése alá.")
+                    Text("If the service stops or Zephyr quits, the fans go straight back under macOS control.")
                 }
                 .font(.system(size: 10.5))
             }
 
             SwiftUI.Section("Zephyr") {
-                LabeledContent("Verzió", value: "1.0")
-                LabeledContent("Gép", value: hardwareModel)
-                LabeledContent("Ventilátorok", value: "\(state.snapshot.fans.count)")
-                LabeledContent("Szenzorok", value: "\(state.snapshot.sensors.count)")
+                LabeledContent("Version", value: "1.0")
+                LabeledContent("Mac", value: hardwareModel)
+                LabeledContent("Fans", value: "\(state.snapshot.fans.count)")
+                LabeledContent("Sensors", value: "\(state.snapshot.sensors.count)")
             }
         }
         .formStyle(.grouped)

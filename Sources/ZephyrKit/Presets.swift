@@ -81,9 +81,9 @@ public struct Preset: Codable, Hashable, Identifiable, Sendable {
     public var subtitle: String {
         switch mode {
         case .system:
-            return "A macOS vezérel"
+            return "macOS decides"
         case .fixed(let percent):
-            return "Fix \(Int(percent.rounded())) %"
+            return "Fixed \(Int(percent.rounded())) %"
         case .curve(let curve):
             return curve.source.title
         }
@@ -111,7 +111,7 @@ public extension Preset {
 
     static let systemPreset = Preset(
         id: BuiltIn.system,
-        name: "Automatikus",
+        name: "Automatic",
         symbol: "apple.logo",
         tint: "gray",
         mode: .system,
@@ -120,7 +120,7 @@ public extension Preset {
 
     static let silent = Preset(
         id: BuiltIn.silent,
-        name: "Csendes",
+        name: "Silent",
         symbol: "moon.zzz.fill",
         tint: "indigo",
         mode: .curve(FanCurve(source: .hottest, points: [
@@ -135,7 +135,7 @@ public extension Preset {
 
     static let balanced = Preset(
         id: BuiltIn.balanced,
-        name: "Kiegyensúlyozott",
+        name: "Balanced",
         symbol: "dial.medium.fill",
         tint: "blue",
         mode: .curve(FanCurve(source: .hottest, points: [
@@ -150,7 +150,7 @@ public extension Preset {
 
     static let cool = Preset(
         id: BuiltIn.cool,
-        name: "Hűvös",
+        name: "Cool",
         symbol: "snowflake",
         tint: "teal",
         mode: .curve(FanCurve(source: .hottest, points: [
@@ -165,7 +165,7 @@ public extension Preset {
 
     static let turbo = Preset(
         id: BuiltIn.turbo,
-        name: "Turbó",
+        name: "Turbo",
         symbol: "bolt.fill",
         tint: "orange",
         mode: .fixed(percent: 100),
@@ -175,7 +175,7 @@ public extension Preset {
     /// Driven by the slider in the popover; its percentage lives in `Settings.manualPercent`.
     static let manual = Preset(
         id: BuiltIn.manual,
-        name: "Kézi",
+        name: "Manual",
         symbol: "slider.horizontal.3",
         tint: "purple",
         mode: .fixed(percent: 45),
@@ -218,10 +218,10 @@ public enum MenuBarStyle: String, Codable, CaseIterable, Sendable {
 
     public var title: String {
         switch self {
-        case .iconOnly: return "Csak ikon"
-        case .temperature: return "Hőmérséklet"
-        case .rpm: return "Fordulatszám"
-        case .both: return "Hőmérséklet + RPM"
+        case .iconOnly: return "Icon only"
+        case .temperature: return "Temperature"
+        case .rpm: return "Fan speed"
+        case .both: return "Temperature + RPM"
         }
     }
 }
@@ -239,7 +239,7 @@ public struct Settings: Codable, Sendable {
     /// Max RPM change per update tick — keeps the fans from stepping audibly.
     public var rampStep: Double
     public var launchAtLogin: Bool
-    /// Percentage the "Kézi" preset holds, edited by the popover slider.
+    /// Percentage the "Manual" preset holds, edited by the popover slider.
     public var manualPercent: Double
 
     public init(presets: [Preset] = Preset.builtIns,

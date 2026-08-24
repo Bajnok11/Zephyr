@@ -33,7 +33,7 @@ func log(_ message: String) {
 }
 
 guard getuid() == 0 else {
-    log("root jogosultság szükséges")
+    log("root privileges required")
     exit(1)
 }
 
@@ -43,7 +43,7 @@ let smc: SMC
 do {
     smc = try SMC()
 } catch {
-    log("SMC megnyitása sikertelen: \(error)")
+    log("could not open the SMC: \(error)")
     exit(1)
 }
 
@@ -60,7 +60,7 @@ let fans: [FanLimits] = (0..<fanCount).compactMap { index in
           maximum > minimum else { return nil }
     return FanLimits(index: index, min: minimum, max: maximum)
 }
-log("\(fans.count) ventilátor észlelve, engedélyezett uid: \(allowedUID)")
+log("\(fans.count) fan(s) detected, permitted uid: \(allowedUID)")
 
 let stateLock = NSLock()
 var controlEngaged = false
@@ -85,7 +85,7 @@ func releaseAll(reason: String) {
     stateLock.unlock()
     guard wasEngaged else { return }
     for fan in fans { release(fan: fan) }
-    log("ventilátorok visszaadva a rendszernek (\(reason))")
+    log("fans handed back to the firmware (\(reason))")
 }
 
 // MARK: - Signals
@@ -97,7 +97,7 @@ for signalNumber in [SIGTERM, SIGINT, SIGHUP] {
     signal(signalNumber, SIG_IGN)
     let source = DispatchSource.makeSignalSource(signal: signalNumber, queue: .main)
     source.setEventHandler {
-        releaseAll(reason: "leállítás")
+        releaseAll(reason: "shutdown")
         unlink(HelperProtocol.socketPath)
         exit(0)
     }
@@ -110,7 +110,7 @@ unlink(HelperProtocol.socketPath)
 
 let listener = socket(AF_UNIX, SOCK_STREAM, 0)
 guard listener >= 0 else {
-    log("socket() sikertelen: \(String(cString: strerror(errno)))")
+    log("socket() failed: \(String(cString: strerror(errno)))")
     exit(1)
 }
 
@@ -128,7 +128,7 @@ let bindResult = withUnsafePointer(to: &address) { pointer in
     }
 }
 guard bindResult == 0 else {
-    log("bind() sikertelen: \(String(cString: strerror(errno)))")
+    log("bind() failed: \(String(cString: strerror(errno)))")
     exit(1)
 }
 
@@ -137,10 +137,10 @@ chmod(HelperProtocol.socketPath, 0o600)
 chown(HelperProtocol.socketPath, allowedUID, 0)
 
 guard listen(listener, 4) == 0 else {
-    log("listen() sikertelen: \(String(cString: strerror(errno)))")
+    log("listen() failed: \(String(cString: strerror(errno)))")
     exit(1)
 }
-log("figyelés: \(HelperProtocol.socketPath)")
+log("listening on \(HelperProtocol.socketPath)")
 
 // MARK: - Peer verification
 
@@ -158,7 +158,7 @@ func peerUID(of fd: Int32) -> uid_t? {
 
 func handle(line: String) -> String {
     let parts = line.split(separator: " ").map(String.init)
-    guard let verb = parts.first?.uppercased() else { return "ERR üres parancs" }
+    guard let verb = parts.first?.uppercased() else { return "ERR empty command" }
 
     switch verb {
     case "HELLO":
@@ -169,28 +169,28 @@ func handle(line: String) -> String {
 
     case "SET":
         guard parts.count == 3, let index = Int(parts[1]), let rpm = Double(parts[2]) else {
-            return "ERR használat: SET <index> <rpm>"
+            return "ERR usage: SET <index> <rpm>"
         }
-        guard let fan = fans.first(where: { $0.index == index }) else { return "ERR ismeretlen ventilátor" }
+        guard let fan = fans.first(where: { $0.index == index }) else { return "ERR unknown fan" }
         do {
             try engage(fan: fan, rpm: rpm)
             return "OK \(Int(Swift.min(Swift.max(rpm, fan.min), fan.max).rounded()))"
         } catch {
-            return "ERR SMC írás sikertelen: \(error)"
+            return "ERR SMC write failed: \(error)"
         }
 
     case "AUTO":
-        guard parts.count == 2, let index = Int(parts[1]) else { return "ERR használat: AUTO <index>" }
-        guard let fan = fans.first(where: { $0.index == index }) else { return "ERR ismeretlen ventilátor" }
+        guard parts.count == 2, let index = Int(parts[1]) else { return "ERR usage: AUTO <index>" }
+        guard let fan = fans.first(where: { $0.index == index }) else { return "ERR unknown fan" }
         release(fan: fan)
         return "OK"
 
     case "AUTOALL":
-        releaseAll(reason: "kérésre")
+        releaseAll(reason: "requested")
         return "OK"
 
     default:
-        return "ERR ismeretlen parancs"
+        return "ERR unknown command"
     }
 }
 
@@ -208,12 +208,12 @@ func serve(connection fd: Int32) {
 
         close(fd)
         // The controlling app went away — never leave the fans pinned.
-        if isCurrent { releaseAll(reason: "kapcsolat lezárult") }
+        if isCurrent { releaseAll(reason: "connection closed") }
     }
 
     guard let uid = peerUID(of: fd), uid == allowedUID else {
-        log("kapcsolat elutasítva (uid nem egyezik)")
-        _ = "ERR jogosulatlan\n".withCString { send(fd, $0, strlen($0), 0) }
+        log("connection refused (uid mismatch)")
+        _ = "ERR unauthorised\n".withCString { send(fd, $0, strlen($0), 0) }
         return
     }
 
@@ -229,7 +229,7 @@ func serve(connection fd: Int32) {
         let count = recv(fd, &buffer, buffer.count, 0)
         if count <= 0 {
             if count < 0 && (errno == EAGAIN || errno == EWOULDBLOCK) {
-                log("watchdog: nincs életjel \(Int(HelperProtocol.watchdogInterval)) mp óta")
+                log("watchdog: no heartbeat for \(Int(HelperProtocol.watchdogInterval))s")
             }
             return
         }
@@ -255,7 +255,7 @@ DispatchQueue.global(qos: .userInitiated).async {
         let connection = accept(listener, nil, nil)
         if connection < 0 {
             if errno == EINTR { continue }
-            log("accept() sikertelen: \(String(cString: strerror(errno)))")
+            log("accept() failed: \(String(cString: strerror(errno)))")
             usleep(200_000)
             continue
         }

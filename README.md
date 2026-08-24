@@ -9,8 +9,6 @@
 
 Built and tested on Apple Silicon (M-series). Intel Macs use the same SMC keys and should work, but nothing here has been verified on one — reports welcome.
 
-> **Heads up:** the user interface is currently in **Hungarian**. Localisation PRs are very welcome — all strings live in the view files.
-
 <p align="center">
   <img src="docs/images/panel.png" alt="Zephyr menu bar panel showing temperature, presets and fan gauges" width="360">
 </p>
@@ -57,7 +55,7 @@ git clone https://github.com/Bajnok11/Zephyr.git
 cd Zephyr && ./Scripts/build.sh
 ```
 
-That compiles everything, assembles `Zephyr.app`, signs it ad-hoc, and installs it to `~/Applications`. Then launch it and, in **Beállítások → Általános**, press **Telepítés** to install the privileged helper. macOS asks for your admin password in its own dialog — Zephyr never sees or handles the password itself.
+That compiles everything, assembles `Zephyr.app`, signs it ad-hoc, and installs it to `~/Applications`. Then launch it and, in **Settings → General**, press **Install** to install the privileged helper. macOS asks for your admin password in its own dialog — Zephyr never sees or handles the password itself.
 
 ### What the helper installation does
 
@@ -68,7 +66,7 @@ That compiles everything, assembles `Zephyr.app`, signs it ad-hoc, and installs 
 | `/var/run/zephyr-helper.sock` | Unix socket, `0600`, owned by the installing user |
 | `/var/log/zephyr-helper.log` | Helper log |
 
-To remove all of it, press **Eltávolítás** in the same settings pane, or run `sudo ./Scripts/uninstall-helper.sh`.
+To remove all of it, press **Remove** in the same settings pane, or run `sudo ./Scripts/uninstall-helper.sh`.
 
 ## How it works
 
@@ -101,7 +99,7 @@ On Apple Silicon the SMC exposes a few hundred thermal keys with no metadata att
 | `Ts0P`, `Ts1P` | Enclosure / palm rest |
 | `Ta**` | Airflow and ambient |
 
-Anything unrecognised still shows up in the sensor browser under *Egyéb* with its raw key. Readings outside 1–125 °C are treated as unpopulated sensors and hidden.
+Anything unrecognised still shows up in the sensor browser under *Other* with its raw key. Readings outside 1–125 °C are treated as unpopulated sensors and hidden.
 
 ## Building from source
 
@@ -117,11 +115,11 @@ The package has three targets: `ZephyrKit` (SMC access, models, presets, helper 
 
 - *The app that launched Zephyr is disabled in the menu bar allow-list.* This one is vicious, because nothing about it points at Zephyr. macOS 26 keeps a per-app list under **System Settings → Menu Bar → "Allow in the Menu Bar"**, and the block propagates from the **launching** process to whatever it launches. If you start Zephyr from a terminal, an IDE, or a coding agent whose own entry is switched off, Zephyr's status item is silently denied a slot — `NSStatusItem.isVisible` still reports `true`, the button still has a valid frame, and there is no error anywhere. The tell is the geometry: a placed item's window is **33 pt** tall and sits inside the menu bar strip; a denied one is **22 pt** tall and is parked off-screen or flush past the right edge, underneath the system clock. Fix: enable the launching app in that list, or just launch Zephyr normally (Finder, Spotlight, or as a login item).
 - *A menu bar manager* (Ice, Bartender, Hidden Bar) puts new items in its hidden section — unhide Zephyr there.
-- *The menu bar is genuinely full.* On a notched Mac with a dozen menu bar apps there may be no slot left. Switching the display style to *Csak ikon* halves the width Zephyr needs.
+- *The menu bar is genuinely full.* On a notched Mac with a dozen menu bar apps there may be no slot left. Switching the display style to *Icon only* halves the width Zephyr needs.
 
-Zephyr detects all three: when the item is not really placed it opens its panel window instead, with a note explaining what happened. And the app is always reachable — **click Zephyr in Finder / Applications / Spotlight while it is running and the panel opens** — plus the status item's right-click menu has a *Vezérlőpult ablakban* entry.
+Zephyr detects all three: when the item is not really placed it opens its panel window instead, with a note explaining what happened. And the app is always reachable — **click Zephyr in Finder / Applications / Spotlight while it is running and the panel opens** — plus the status item's right-click menu has an *Open control panel in a window* entry.
 
-**"Nem sikerült csatlakozni a szolgáltatáshoz".** The helper isn't running. Check `sudo launchctl print system/com.bence.zephyr.helper` and `/var/log/zephyr-helper.log`, or just press **Újratelepítés**.
+**"Could not connect to the service".** The helper isn't running. Check `sudo launchctl print system/com.bence.zephyr.helper` and `/var/log/zephyr-helper.log`, or just press **Reinstall**.
 
 **Fans don't change.** Another fan control app (Macs Fan Control, TG Pro, smcFanControl) is probably fighting Zephyr for the same SMC keys. Quit the other one — whichever writes last wins, and the result is an unpleasant oscillation.
 

@@ -18,16 +18,16 @@ public enum SensorGroup: String, Codable, CaseIterable, Hashable, Sendable {
     public var title: String {
         switch self {
         case .cpu: return "CPU"
-        case .efficiency: return "E-magok"
+        case .efficiency: return "E-cores"
         case .gpu: return "GPU"
         case .soc: return "SoC"
-        case .memory: return "Memória"
+        case .memory: return "Memory"
         case .storage: return "SSD"
-        case .battery: return "Akkumulátor"
-        case .power: return "Tápellátás"
-        case .enclosure: return "Ház"
-        case .ambient: return "Környezet"
-        case .other: return "Egyéb"
+        case .battery: return "Battery"
+        case .power: return "Power"
+        case .enclosure: return "Enclosure"
+        case .ambient: return "Ambient"
+        case .other: return "Other"
         }
     }
 
@@ -75,34 +75,34 @@ public struct SensorReading: Identifiable, Hashable, Sendable {
 ///
 /// Apple Silicon exposes hundreds of thermal keys with no metadata, so this is
 /// pattern matching on the naming scheme Apple has used since the M1. Anything
-/// we do not recognise still shows up under "Egyéb" with its raw key.
+/// we do not recognise still shows up under "Other" with its raw key.
 public enum SensorCatalog {
 
     /// Keys we explicitly know, with a nicer label.
     private static let named: [String: (String, SensorGroup)] = [
-        "TB0T": ("Akkumulátor 1", .battery),
-        "TB1T": ("Akkumulátor 2", .battery),
-        "TB2T": ("Akkumulátor 3", .battery),
-        "TW0P": ("Wi-Fi modul", .other),
-        "Ts0P": ("Ház – bal csuklótámasz", .enclosure),
-        "Ts1P": ("Ház – jobb csuklótámasz", .enclosure),
-        "TS0P": ("Ház – alsó burkolat", .enclosure),
-        "TCHP": ("Töltő chip", .power),
-        "TCMb": ("Fő panel", .soc),
-        "TCMz": ("Fő panel (forró pont)", .soc),
-        "TMVR": ("Memória VRM", .memory),
-        "TSVR": ("Rendszer VRM", .power),
-        "TPMP": ("Tápegység", .power),
-        "TPSP": ("Táp – hálózati oldal", .power),
-        "TaLP": ("Légáram – bal", .ambient),
-        "TaRF": ("Légáram – jobb", .ambient),
-        "TaTP": ("Légáram – felső", .ambient),
-        "TaLT": ("Levegő – bal (be)", .ambient),
-        "TaRT": ("Levegő – jobb (be)", .ambient),
-        "TaLW": ("Levegő – bal (ki)", .ambient),
-        "TaRW": ("Levegő – jobb (ki)", .ambient),
-        "TAOL": ("Környezeti levegő", .ambient),
-        "TH0x": ("SSD vezérlő", .storage),
+        "TB0T": ("Battery 1", .battery),
+        "TB1T": ("Battery 2", .battery),
+        "TB2T": ("Battery 3", .battery),
+        "TW0P": ("Wi-Fi module", .other),
+        "Ts0P": ("Enclosure – left palm rest", .enclosure),
+        "Ts1P": ("Enclosure – right palm rest", .enclosure),
+        "TS0P": ("Enclosure – bottom case", .enclosure),
+        "TCHP": ("Charger chip", .power),
+        "TCMb": ("Main board", .soc),
+        "TCMz": ("Main board (hot spot)", .soc),
+        "TMVR": ("Memory VRM", .memory),
+        "TSVR": ("System VRM", .power),
+        "TPMP": ("Power supply", .power),
+        "TPSP": ("Power – mains side", .power),
+        "TaLP": ("Airflow – left", .ambient),
+        "TaRF": ("Airflow – right", .ambient),
+        "TaTP": ("Airflow – top", .ambient),
+        "TaLT": ("Air – left (intake)", .ambient),
+        "TaRT": ("Air – right (intake)", .ambient),
+        "TaLW": ("Air – left (exhaust)", .ambient),
+        "TaRW": ("Air – right (exhaust)", .ambient),
+        "TAOL": ("Ambient air", .ambient),
+        "TH0x": ("SSD controller", .storage),
         "TH1x": ("SSD NAND", .storage),
     ]
 
@@ -114,21 +114,21 @@ public enum SensorCatalog {
         let suffix = String(chars[2...])
 
         switch String(chars[0...1]) {
-        case "Tp":  return ("CPU P-mag \(suffix)", .cpu)
-        case "Te":  return ("CPU E-mag \(suffix)", .efficiency)
+        case "Tp":  return ("CPU P-core \(suffix)", .cpu)
+        case "Te":  return ("CPU E-core \(suffix)", .efficiency)
         case "Tg":  return ("GPU \(suffix)", .gpu)
-        case "Tm":  return ("Memória \(suffix)", .memory)
-        case "Td":  return ("SoC lapka \(suffix)", .soc)
-        case "Th":  return ("Hűtőborda \(suffix)", .soc)
-        case "Ts":  return ("Ház \(suffix)", .enclosure)
+        case "Tm":  return ("Memory \(suffix)", .memory)
+        case "Td":  return ("SoC die \(suffix)", .soc)
+        case "Th":  return ("Heatsink \(suffix)", .soc)
+        case "Ts":  return ("Enclosure \(suffix)", .enclosure)
         case "TH":  return ("SSD \(suffix)", .storage)
-        case "TB":  return ("Akkumulátor \(suffix)", .battery)
-        case "TC":  return ("CPU klaszter \(suffix)", .cpu)
+        case "TB":  return ("Battery \(suffix)", .battery)
+        case "TC":  return ("CPU cluster \(suffix)", .cpu)
         case "TP":  return ("PMU \(suffix)", .power)
         case "TV":  return ("VRM \(suffix)", .power)
-        case "TR":  return ("Rádió / RF \(suffix)", .other)
-        case "TD":  return ("Kijelző / lapka \(suffix)", .other)
-        case "Ta":  return ("Légáram \(suffix)", .ambient)
+        case "TR":  return ("Radio / RF \(suffix)", .other)
+        case "TD":  return ("Display / die \(suffix)", .other)
+        case "Ta":  return ("Airflow \(suffix)", .ambient)
         case "TT":  return ("Thunderbolt \(suffix)", .other)
         default:    return nil
         }
@@ -155,7 +155,7 @@ public enum CurveSource: Codable, Hashable, Sendable {
 
     public var title: String {
         switch self {
-        case .hottest: return "Legmelegebb alkatrész"
+        case .hottest: return "Hottest component"
         case .group(let group): return group.title
         case .key(let key): return SensorCatalog.describe(key: key)?.name ?? key
         }

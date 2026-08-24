@@ -44,10 +44,10 @@ public final class HelperClient {
 
         public var errorDescription: String? {
             switch self {
-            case .notInstalled: return "A vezérlő szolgáltatás nincs telepítve."
-            case .connectionFailed(let reason): return "Nem sikerült csatlakozni a szolgáltatáshoz: \(reason)"
-            case .rejected(let reason): return "A szolgáltatás elutasította a kérést: \(reason)"
-            case .timeout: return "A szolgáltatás nem válaszolt."
+            case .notInstalled: return "The control service is not installed."
+            case .connectionFailed(let reason): return "Could not connect to the service: \(reason)"
+            case .rejected(let reason): return "The service refused the request: \(reason)"
+            case .timeout: return "The service did not respond."
             }
         }
     }
@@ -94,7 +94,7 @@ public final class HelperClient {
         lock.lock(); defer { lock.unlock() }
         guard fd < 0 else { return }
         guard FileManager.default.fileExists(atPath: HelperProtocol.socketPath) else {
-            if Self.isInstalled { throw ClientError.connectionFailed("a szolgáltatás nem fut") }
+            if Self.isInstalled { throw ClientError.connectionFailed("the service is not running") }
             throw ClientError.notInstalled
         }
 
@@ -139,7 +139,7 @@ public final class HelperClient {
     public func send(_ command: HelperProtocol.Command) throws -> String {
         try connect()
         lock.lock(); defer { lock.unlock() }
-        guard fd >= 0 else { throw ClientError.connectionFailed("nincs kapcsolat") }
+        guard fd >= 0 else { throw ClientError.connectionFailed("no connection") }
 
         let payload = command.wire + "\n"
         let written = payload.withCString { pointer in
@@ -147,7 +147,7 @@ public final class HelperClient {
         }
         guard written > 0 else {
             closeUnsafe()
-            throw ClientError.connectionFailed("írás sikertelen")
+            throw ClientError.connectionFailed("write failed")
         }
 
         var response = ""

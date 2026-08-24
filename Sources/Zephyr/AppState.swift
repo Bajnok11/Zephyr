@@ -16,9 +16,9 @@ enum HelperState: Equatable {
 
     var title: String {
         switch self {
-        case .notInstalled: return "Vezérlés nincs telepítve"
-        case .installed: return "Szolgáltatás elérhető"
-        case .connected: return "Vezérlés aktív"
+        case .notInstalled: return "Control not installed"
+        case .installed: return "Service available"
+        case .connected: return "Control active"
         case .failed(let reason): return reason
         }
     }
@@ -119,7 +119,7 @@ final class AppState: ObservableObject {
     /// has to be assembled here rather than by `Preset` itself.
     func subtitle(for preset: Preset) -> String {
         preset.id == Preset.BuiltIn.manual
-            ? "Fix \(Int(settings.manualPercent.rounded())) %"
+            ? "Fixed \(Int(settings.manualPercent.rounded())) %"
             : preset.subtitle
     }
 
@@ -153,7 +153,7 @@ final class AppState: ObservableObject {
     func duplicate(preset: Preset) -> Preset {
         var copy = preset
         copy.id = UUID()
-        copy.name = preset.name + " másolat"
+        copy.name = preset.name + " copy"
         copy.isBuiltIn = false
         if case .system = copy.mode {
             copy.mode = .curve(FanCurve(source: .hottest, points: [
@@ -359,7 +359,7 @@ final class AppState: ObservableObject {
     /// Runs a shell script through the standard macOS authorisation prompt.
     /// The password is typed into the system dialog — it never passes through Zephyr.
     private static func runPrivileged(script: String?, arguments: [String]) -> PrivilegedResult {
-        guard let script else { return .failure("Hiányzik a telepítő szkript az app csomagból.") }
+        guard let script else { return .failure("The installer script is missing from the app bundle.") }
         let quoted = ([script] + arguments)
             .map { "'" + $0.replacingOccurrences(of: "'", with: "'\\''") + "'" }
             .joined(separator: " ")
@@ -370,13 +370,13 @@ final class AppState: ObservableObject {
 
         var errorInfo: NSDictionary?
         guard let appleScript = NSAppleScript(source: source) else {
-            return .failure("Nem sikerült előkészíteni a telepítést.")
+            return .failure("Could not prepare the installation.")
         }
         let output = appleScript.executeAndReturnError(&errorInfo)
         if let errorInfo {
             let number = errorInfo["NSAppleScriptErrorNumber"] as? Int ?? 0
-            if number == -128 { return .failure("A telepítés megszakítva.") }
-            let message = errorInfo["NSAppleScriptErrorMessage"] as? String ?? "ismeretlen hiba"
+            if number == -128 { return .failure("Installation cancelled.") }
+            let message = errorInfo["NSAppleScriptErrorMessage"] as? String ?? "unknown error"
             return .failure(message)
         }
         return .success(output.stringValue ?? "")
@@ -393,7 +393,7 @@ final class AppState: ObservableObject {
                 try SMAppService.mainApp.unregister()
             }
         } catch {
-            lastError = "Bejelentkezéskori indítás: \(error.localizedDescription)"
+            lastError = "Launch at login: \(error.localizedDescription)"
         }
     }
 

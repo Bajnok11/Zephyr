@@ -88,9 +88,9 @@ public final class HardwareMonitor {
     // MARK: Discovery
 
     private static func fanName(index: Int, total: Int) -> String {
-        if total == 2 { return index == 0 ? "Bal ventilátor" : "Jobb ventilátor" }
-        if total == 1 { return "Ventilátor" }
-        return "Ventilátor \(index + 1)"
+        if total == 2 { return index == 0 ? "Left fan" : "Right fan" }
+        if total == 1 { return "Fan" }
+        return "Fan \(index + 1)"
     }
 
     private func discoverFans() {

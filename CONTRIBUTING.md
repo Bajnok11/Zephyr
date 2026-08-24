@@ -12,7 +12,7 @@ git clone https://github.com/Bajnok11/Zephyr.git && cd Zephyr && swift build
 
 ## What's especially welcome
 
-- **Localisation.** The UI strings are Hungarian and inline in the view files. Moving them to a string catalogue and adding English would be a real improvement.
+- **Localisation.** The UI is English, with the strings inline in the view files. Moving them into a string catalogue would be the first step towards other languages.
 - **Hardware reports.** If Zephyr misreads your Mac — wrong fan count, sensors named oddly, a model where nothing works — open an issue with the model identifier and, if you can, the output of the sensor browser. Different Macs name their SMC keys differently and the catalogue in `Sensors.swift` only knows what it has seen.
 - **Intel Macs.** This was developed against an M1 Pro. Intel Macs use the same keys but not always the same encodings; fixes there are useful.
 

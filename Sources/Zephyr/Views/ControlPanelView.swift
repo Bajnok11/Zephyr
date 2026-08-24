@@ -59,7 +59,7 @@ struct ControlPanelView: View {
                 StatusPill(symbol: controlSymbol, text: state.helperState.title, color: controlColor)
                 if state.isOverriddenByAutomation {
                     StatusPill(symbol: "wand.and.stars",
-                               text: state.isOnBattery ? "Akkun" : "Hálózaton",
+                               text: state.isOnBattery ? "On battery" : "On mains",
                                color: .orange)
                 }
             }
@@ -89,10 +89,10 @@ struct ControlPanelView: View {
 
     private var menuBarWarning: some View {
         VStack(alignment: .leading, spacing: 5) {
-            Label("Nincs hely a menüsorban", systemImage: "exclamationmark.triangle.fill")
+            Label("No room in the menu bar", systemImage: "exclamationmark.triangle.fill")
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(.orange)
-            Text("A macOS nem adott helyet a Zephyr ikonjának. A leggyakoribb ok, hogy az az app, amelyik a Zephyrt elindította, ki van kapcsolva a Rendszerbeállítások → Menüsor listájában — a tiltás onnan öröklődik. Nézd meg ott, vagy indítsd a Zephyrt a Finderből. Addig ez az ablak a Zephyr indításával bármikor előhívható.")
+            Text("macOS did not give Zephyr's icon a slot. The usual reason is that whatever app launched Zephyr is switched off in System Settings → Menu Bar — the block is inherited from there. Check that list, or launch Zephyr from Finder. Until then this window opens whenever you start Zephyr.")
                 .font(.system(size: 10.5))
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -104,10 +104,10 @@ struct ControlPanelView: View {
 
     private var staleHelperWarning: some View {
         VStack(alignment: .leading, spacing: 5) {
-            Label("A vezérlő szolgáltatás elavult", systemImage: "arrow.triangle.2.circlepath")
+            Label("The control service is out of date", systemImage: "arrow.triangle.2.circlepath")
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(.orange)
-            Text("A telepített root szolgáltatás régebbi, mint amit ez a Zephyr hoz magával. Az appfrissítés nem cseréli le magától. Beállítások → Általános → Újratelepítés.")
+            Text("The installed root service is older than the one this Zephyr ships with. Updating the app does not replace it. Settings → General → Reinstall.")
                 .font(.system(size: 10.5))
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -122,10 +122,10 @@ struct ControlPanelView: View {
     private var presetSection: some View {
         VStack(alignment: .leading, spacing: 7) {
             HStack {
-                SectionLabel(text: "Profil")
+                SectionLabel(text: "Preset")
                 Spacer()
                 if state.isOverriddenByAutomation {
-                    Text("automatizálás felülírja")
+                    Text("overridden by automation")
                         .font(.system(size: 9))
                         .foregroundStyle(.orange)
                 }
@@ -147,7 +147,7 @@ struct ControlPanelView: View {
         Card {
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
-                    Text("Kézi fordulatszám")
+                    Text("Manual fan speed")
                         .font(.system(size: 11, weight: .medium))
                     Spacer()
                     Text("\(Int(state.settings.manualPercent.rounded())) %")
@@ -172,11 +172,11 @@ struct ControlPanelView: View {
 
     private var fanSection: some View {
         VStack(alignment: .leading, spacing: 7) {
-            SectionLabel(text: "Ventilátorok")
+            SectionLabel(text: "Fans")
 
             if state.snapshot.fans.isEmpty {
                 Card {
-                    Text("Nem található vezérelhető ventilátor ezen a gépen.")
+                    Text("No controllable fan found on this Mac.")
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -199,7 +199,7 @@ struct ControlPanelView: View {
                                 HStack(spacing: 4) {
                                     Text("\(Int((fan.load * 100).rounded())) %")
                                     Text("·")
-                                    Text(fan.isManual ? "vezérelt" : "auto")
+                                    Text(fan.isManual ? "controlled" : "auto")
                                         .foregroundStyle(fan.isManual ? Color.accentColor : .secondary)
                                 }
                                 .font(.system(size: 9))
@@ -223,14 +223,14 @@ struct ControlPanelView: View {
 
         return VStack(alignment: .leading, spacing: 7) {
             HStack {
-                SectionLabel(text: "Alakulás")
+                SectionLabel(text: "Trend")
                 Spacer()
                 if let last = temperatures.last {
                     Text("\(Int(low))° – \(Int(high))°")
                         .font(.system(size: 9))
                         .foregroundStyle(.secondary)
                         .monospacedDigit()
-                        .accessibilityLabel("Tartomány, aktuális \(Int(last)) fok")
+                        .accessibilityLabel("Range, currently \(Int(last)) degrees")
                 }
             }
             Card(padding: 9) {
@@ -257,7 +257,7 @@ struct ControlPanelView: View {
         }
 
         return VStack(alignment: .leading, spacing: 7) {
-            SectionLabel(text: "Szenzorok")
+            SectionLabel(text: "Sensors")
             Card {
                 VStack(spacing: 7) {
                     ForEach(summary, id: \.group) { entry in
@@ -278,7 +278,7 @@ struct ControlPanelView: View {
                 Button {
                     state.installHelper()
                 } label: {
-                    Label("Vezérlés bekapcsolása", systemImage: "lock.open")
+                    Label("Enable fan control", systemImage: "lock.open")
                         .font(.system(size: 11, weight: .medium))
                 }
                 .buttonStyle(.borderedProminent)
@@ -303,7 +303,7 @@ struct ControlPanelView: View {
                 Image(systemName: "gearshape")
             }
             .buttonStyle(.plain)
-            .help("Beállítások")
+            .help("Settings")
 
             Button {
                 NSApp.terminate(nil)
@@ -311,7 +311,7 @@ struct ControlPanelView: View {
                 Image(systemName: "power")
             }
             .buttonStyle(.plain)
-            .help("Kilépés")
+            .help("Quit")
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 9)

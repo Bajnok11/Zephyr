@@ -179,7 +179,7 @@ struct CurveEditorView: View {
         HStack {
             Text("20 °C")
             Spacer()
-            Text("dupla kattintás: új pont · húzás: mozgatás")
+            Text("double-click: add a point · drag: move")
                 .foregroundStyle(.tertiary)
             Spacer()
             Text("110 °C")
@@ -217,7 +217,7 @@ struct CurveEditorView: View {
             }
             .buttonStyle(.plain)
             .disabled(selectedID == nil || curve.points.count <= 2)
-            .help("Kijelölt pont törlése")
+            .help("Delete the selected point")
         }
     }
 
@@ -247,13 +247,13 @@ struct CurveSourcePicker: View {
 
     var body: some View {
         Menu {
-            Button("Legmelegebb alkatrész") { source = .hottest }
+            Button("Hottest component") { source = .hottest }
             Divider()
             ForEach(SensorGroup.controllable, id: \.self) { group in
                 Button(group.title) { source = .group(group) }
             }
             Divider()
-            Menu("Egyedi szenzor") {
+            Menu("Specific sensor") {
                 ForEach(SensorGroup.allCases, id: \.self) { group in
                     let keys = availableKeys.filter { $0.group == group }
                     if !keys.isEmpty {

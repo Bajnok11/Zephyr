@@ -16,7 +16,7 @@ INSTALL_DIR="$HOME/Applications"
 # Intel Mac, which this app otherwise supports.
 ARCH="$(uname -m)"
 
-echo "==> Fordítás (release, $ARCH)"
+echo "==> Building (release, $ARCH)"
 swift build \
     --package-path "$PROJECT_DIR" \
     --scratch-path "$BUILD_DIR/scratch" \
@@ -25,7 +25,7 @@ swift build \
 
 BIN_DIR="$(swift build --package-path "$PROJECT_DIR" --scratch-path "$BUILD_DIR/scratch" -c release --arch "$ARCH" --show-bin-path)"
 
-echo "==> Csomag összeállítása"
+echo "==> Assembling the bundle"
 rm -rf "$STAGE"
 mkdir -p "$APP/Contents/MacOS"
 mkdir -p "$APP/Contents/Resources"
@@ -85,25 +85,25 @@ cat > "$APP/Contents/Info.plist" <<PLIST
     <key>BuildMachineOSBuild</key>
     <string>${OS_BUILD}</string>
     <key>NSHumanReadableCopyright</key>
-    <string>Zephyr — ventilátorvezérlés Apple Silicon és Intel Macekhez.</string>
+    <string>Zephyr — fan control for Apple Silicon and Intel Macs.</string>
 </dict>
 </plist>
 PLIST
 
-echo "==> Ikon"
+echo "==> Icon"
 if swift "$PROJECT_DIR/Scripts/make-icon.swift" "$BUILD_DIR/AppIcon.iconset" >/dev/null 2>&1; then
     iconutil -c icns "$BUILD_DIR/AppIcon.iconset" -o "$APP/Contents/Resources/AppIcon.icns"
 else
-    echo "    (ikon generálás kihagyva)"
+    echo "    (icon generation skipped)"
 fi
 
-echo "==> Aláírás (ad-hoc)"
+echo "==> Signing (ad-hoc)"
 codesign --force --sign - --timestamp=none "$APP/Contents/Library/zephyr-helper"
 codesign --force --sign - --timestamp=none "$APP"
 
-echo "==> Telepítés: $INSTALL_DIR/Zephyr.app"
+echo "==> Installing to $INSTALL_DIR/Zephyr.app"
 mkdir -p "$INSTALL_DIR"
 rm -rf "$INSTALL_DIR/Zephyr.app"
 cp -R "$APP" "$INSTALL_DIR/Zephyr.app"
 
-echo "==> Kész: $INSTALL_DIR/Zephyr.app"
+echo "==> Done: $INSTALL_DIR/Zephyr.app"

@@ -38,12 +38,12 @@ public final class SMC {
 
         public var errorDescription: String? {
             switch self {
-            case .serviceNotFound: return "Nem található AppleSMC szolgáltatás."
-            case .openFailed(let r): return "SMC megnyitása sikertelen (0x\(String(r, radix: 16)))."
-            case .callFailed(let r): return "SMC hívás sikertelen (0x\(String(r, radix: 16)))."
-            case .smcResult(let r): return "SMC hibakód: \(r)."
-            case .unknownKey(let k): return "Ismeretlen SMC kulcs: \(k)."
-            case .notPermitted: return "Az SMC írásához rendszergazdai helper kell."
+            case .serviceNotFound: return "No AppleSMC service found."
+            case .openFailed(let r): return "Could not open the SMC (0x\(String(r, radix: 16)))."
+            case .callFailed(let r): return "SMC call failed (0x\(String(r, radix: 16)))."
+            case .smcResult(let r): return "SMC error code: \(r)."
+            case .unknownKey(let k): return "Unknown SMC key: \(k)."
+            case .notPermitted: return "Writing to the SMC requires the privileged helper."
             }
         }
     }

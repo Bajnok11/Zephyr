@@ -65,7 +65,7 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
         button.target = self
         button.action = #selector(handleClick)
         button.sendAction(on: [.leftMouseUp, .rightMouseUp])
-        button.toolTip = "Zephyr – ventilátorvezérlés"
+        button.toolTip = "Zephyr — fan control"
     }
 
     private func configurePopover() {
@@ -260,15 +260,15 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
         }
 
         menu.addItem(.separator())
-        let panel = NSMenuItem(title: "Vezérlőpult ablakban", action: #selector(showPanelWindowAction), keyEquivalent: "")
+        let panel = NSMenuItem(title: "Open control panel in a window", action: #selector(showPanelWindowAction), keyEquivalent: "")
         panel.target = self
         menu.addItem(panel)
 
-        let settings = NSMenuItem(title: "Beállítások…", action: #selector(openSettings), keyEquivalent: ",")
+        let settings = NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
         settings.target = self
         menu.addItem(settings)
 
-        let quit = NSMenuItem(title: "Kilépés", action: #selector(quit), keyEquivalent: "q")
+        let quit = NSMenuItem(title: "Quit", action: #selector(quit), keyEquivalent: "q")
         quit.target = self
         menu.addItem(quit)
 
@@ -298,7 +298,7 @@ final class StatusItemController: NSObject, NSPopoverDelegate {
 
         let hosting = NSHostingController(rootView: SettingsView().environmentObject(state))
         let window = NSWindow(contentViewController: hosting)
-        window.title = "Zephyr beállítások"
+        window.title = "Zephyr Settings"
         window.styleMask = [.titled, .closable, .miniaturizable, .fullSizeContentView]
         window.titlebarAppearsTransparent = true
         window.setContentSize(NSSize(width: 940, height: 640))

@@ -8,5 +8,6 @@ let package = Package(
         .target(name: "ZephyrKit"),
         .executableTarget(name: "ZephyrHelper", dependencies: ["ZephyrKit"]),
         .executableTarget(name: "Zephyr", dependencies: ["ZephyrKit"]),
+        .testTarget(name: "ZephyrKitTests", dependencies: ["ZephyrKit"]),
     ]
 )

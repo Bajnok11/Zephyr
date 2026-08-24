@@ -8,7 +8,7 @@ DEST_DIR="/Library/Application Support/Zephyr"
 PLIST="/Library/LaunchDaemons/$LABEL.plist"
 
 if [ "$(id -u)" != "0" ]; then
-    echo "hiba: root jogosultság szükséges" >&2
+    echo "error: root privileges required" >&2
     exit 1
 fi
 
@@ -18,4 +18,4 @@ rm -rf "$DEST_DIR"
 rm -f /var/run/zephyr-helper.sock
 rm -f /var/log/zephyr-helper.log
 
-echo "kesz"
+echo "done"

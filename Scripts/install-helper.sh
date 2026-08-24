@@ -16,17 +16,17 @@ DEST="$DEST_DIR/zephyr-helper"
 PLIST="/Library/LaunchDaemons/$LABEL.plist"
 
 if [ -z "$SOURCE" ] || [ ! -f "$SOURCE" ]; then
-    echo "hiba: nem található a helper binális: $SOURCE" >&2
+    echo "error: helper binary not found: $SOURCE" >&2
     exit 1
 fi
 
 if [ -z "$OWNER_UID" ]; then
-    echo "hiba: hiányzik a uid" >&2
+    echo "error: missing uid" >&2
     exit 1
 fi
 
 if [ "$(id -u)" != "0" ]; then
-    echo "hiba: root jogosultság szükséges" >&2
+    echo "error: root privileges required" >&2
     exit 1
 fi
 
@@ -74,12 +74,12 @@ launchctl bootstrap system "$PLIST"
 i=0
 while [ $i -lt 25 ]; do
     if [ -S /var/run/zephyr-helper.sock ]; then
-        echo "kesz"
+        echo "done"
         exit 0
     fi
     sleep 0.2
     i=$((i + 1))
 done
 
-echo "figyelem: a szolgáltatás elindult, de a socket még nem jelent meg" >&2
+echo "warning: the service started but the socket has not appeared yet" >&2
 exit 0
