@@ -10,8 +10,10 @@
 Built and tested on Apple Silicon (M-series). Intel Macs use the same SMC keys and should work, but nothing here has been verified on one — reports welcome.
 
 <p align="center">
-  <img src="docs/images/panel.png" alt="Zephyr menu bar panel showing temperature, presets and fan gauges" width="360">
+  <img src="docs/images/demo.gif" alt="The Zephyr panel: switching to the Turbo preset and watching both fans ramp to full speed" width="360">
 </p>
+
+<p align="center"><sub>Turbo selected — both fans ramping to their hardware maximum, live.</sub></p>
 
 ## Features
 
@@ -27,6 +29,10 @@ Built and tested on Apple Silicon (M-series). Intel Macs use the same SMC keys a
 
 <p align="center">
   <img src="docs/images/curve.png" alt="Zephyr fan curve editor with draggable points and a live position marker" width="720">
+</p>
+
+<p align="center">
+  <img src="docs/images/panel.png" alt="The Zephyr panel with presets, fan gauges and a temperature trend" width="340">
 </p>
 
 ## Safety
@@ -46,6 +52,20 @@ Zephyr never lowers fans below the firmware minimum, and "Automatic" is a genuin
 - Xcode command line tools, to build
 
 ## Install
+
+### Download a build
+
+Grab `Zephyr-1.0-arm64.zip` from the [latest release](https://github.com/Bajnok11/Zephyr/releases/latest), unzip it, and drag `Zephyr.app` into `~/Applications`.
+
+The app is signed ad-hoc rather than with a paid Apple Developer certificate, so Gatekeeper will not open it on the first try. Clear the download quarantine once:
+
+```bash
+xattr -dr com.apple.quarantine ~/Applications/Zephyr.app
+```
+
+Then open it normally. (Right-click → **Open** works too, but the command is less fiddly.) If you would rather not trust a binary from a stranger on the internet — a reasonable instinct for something that runs a root daemon — build it yourself instead; it takes about a minute.
+
+### Build from source
 
 ```bash
 git clone https://github.com/Bajnok11/Zephyr.git
