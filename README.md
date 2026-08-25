@@ -9,6 +9,8 @@
 
 Built and tested on Apple Silicon (M-series). Intel Macs use the same SMC keys and should work, but nothing here has been verified on one — reports welcome.
 
+> **Read this before installing.** Zephyr writes to your Mac's fan controller through a helper that runs as root. It clamps every request to the limits the hardware itself reports and hands the fans back to the firmware the moment anything goes wrong (see [Safety](#safety)) — but holding fans below what macOS would choose means running hotter than Apple intends, and that is your call to make. There is no warranty of any kind; you use it at your own risk.
+
 <p align="center">
   <img src="docs/images/demo.gif" alt="The Zephyr panel: switching to the Turbo preset and watching both fans ramp to full speed" width="360">
 </p>
@@ -153,8 +155,12 @@ Zephyr detects all three: when the item is not really placed it opens its panel 
 
 **Does it phone home?** No network code exists in this repository.
 
-## Licence
+## Licence and disclaimers
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE). As the licence spells out, the software is provided **"as is", without warranty of any kind**, and the author is not liable for any damage arising from its use. That includes anything that follows from running your Mac hotter or cooler than its firmware would.
 
-Not affiliated with Apple. "Mac" and "Apple Silicon" are trademarks of Apple Inc.
+**Not affiliated with Apple.** This is an independent project. It is not endorsed by, sponsored by, or connected to Apple Inc. "Apple", "Mac", "MacBook", "macOS" and "Apple Silicon" are trademarks of Apple Inc. Zephyr contains no Apple source code; it talks to the SMC through the same publicly documented IOKit interface that fan utilities have used for years, reverse-engineered from public sources.
+
+**Not affiliated with any other fan utility.** Macs Fan Control, TG Pro and smcFanControl are named in the troubleshooting section only because they compete for the same SMC keys. No code from any of them is used here.
+
+**Privacy.** Zephyr has no network code, no analytics and no crash reporting. Everything it reads stays on your Mac; its only files are `~/Library/Application Support/Zephyr/settings.json`, the helper under `/Library/Application Support/Zephyr`, and the helper's log at `/var/log/zephyr-helper.log`.
