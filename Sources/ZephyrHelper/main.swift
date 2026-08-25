@@ -67,8 +67,20 @@ var controlEngaged = false
 
 func engage(fan: FanLimits, rpm: Double) throws {
     let clamped = Swift.min(Swift.max(rpm, fan.min), fan.max)
-    try smc.write("F\(fan.index)Tg", value: clamped)
+
+    // Order matters. While the fan is still in automatic mode the firmware owns
+    // the target and silently discards writes to it, so setting the target
+    // first and then switching to manual leaves manual mode engaged with a
+    // target of 0 — a fan forced off while the app believes it asked for full
+    // speed. Engage manual first, then set the target, then confirm it took:
+    // the first write after a mode change does not always land.
     try smc.write("F\(fan.index)Md", value: 1)
+    try smc.write("F\(fan.index)Tg", value: clamped)
+
+    if let readback = smc.number("F\(fan.index)Tg"), abs(readback - clamped) > 1 {
+        try smc.write("F\(fan.index)Tg", value: clamped)
+    }
+
     stateLock.lock()
     controlEngaged = true
     stateLock.unlock()
