@@ -55,6 +55,18 @@ Zephyr never lowers fans below the firmware minimum, and "Automatic" is a genuin
 
 ## Install
 
+### Homebrew
+
+```bash
+brew tap Bajnok11/zephyr && brew trust --cask Bajnok11/zephyr/zephyr
+```
+
+```bash
+brew install --cask zephyr
+```
+
+The `brew trust` step is Homebrew's own gate on third-party taps, and the cask clears the download quarantine for you.
+
 ### Download a build
 
 Grab `Zephyr-1.0-arm64.zip` from the [latest release](https://github.com/Bajnok11/Zephyr/releases/latest), unzip it, and drag `Zephyr.app` into `~/Applications`.
