@@ -100,7 +100,7 @@ That compiles everything, assembles `Zephyr.app`, signs it ad-hoc, and installs 
 | `/var/run/zephyr-helper.sock` | Unix socket, `0600`, owned by the installing user |
 | `/var/log/zephyr-helper.log` | Helper log |
 
-To remove all of it, press **Remove** in the same settings pane, or run `sudo ./Scripts/uninstall-helper.sh`.
+To remove all of it, press **Remove** in the same settings pane, or run `sudo ./Scripts/uninstall-helper.sh`. If you installed through Homebrew, `brew zap --cask zephyr` takes out the app and the helper together — plain `brew uninstall` deliberately leaves the helper alone, because Homebrew runs the same step on every upgrade.
 
 ## How it works
 
