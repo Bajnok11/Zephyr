@@ -672,7 +672,7 @@ private struct GeneralSettings: View {
             }
 
             SwiftUI.Section("Zephyr") {
-                LabeledContent("Version", value: "1.0")
+                LabeledContent("Version", value: appVersion)
                 LabeledContent("Mac", value: hardwareModel)
                 LabeledContent("Fans", value: "\(state.snapshot.fans.count)")
                 LabeledContent("Sensors", value: "\(state.snapshot.sensors.count)")
@@ -697,6 +697,12 @@ private struct GeneralSettings: View {
         case .notInstalled: return .orange
         case .failed: return .red
         }
+    }
+
+    /// Read from the bundle so there is one source of truth for the version.
+    private var appVersion: String {
+        let short = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+        return short ?? "unknown"
     }
 
     private var hardwareModel: String {
